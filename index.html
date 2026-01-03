@@ -32,11 +32,6 @@
 
     h1, h2 { text-align: center; margin: 10px 0; }
 
-    h1{
-      color: var(--green-900);
-      letter-spacing: 0.3px;
-    }
-
     #tabs {
       display:flex;
       justify-content:center;
@@ -54,9 +49,7 @@
       cursor: pointer;
     }
 
-    #tabs button:hover{
-      border-color: var(--green-600);
-    }
+    #tabs button:hover{ border-color: var(--green-600); }
 
     .active-tab{
       background: var(--green-700) !important;
@@ -65,10 +58,7 @@
       font-weight: bold;
     }
 
-    #controls{
-      text-align:center;
-      margin-bottom: 10px;
-    }
+    #controls{ text-align:center; margin-bottom: 10px; }
 
     input, button{
       font-size: 14px;
@@ -78,10 +68,7 @@
       border: 1px solid var(--border);
     }
 
-    input{
-      background: var(--card);
-      min-width: 170px;
-    }
+    input{ background: var(--card); min-width: 170px; }
 
     button{
       cursor:pointer;
@@ -147,15 +134,9 @@
       border-color: var(--yellow-500);
     }
 
-    .total-row{
-      font-weight:bold;
-      background: #fbfdfc;
-    }
+    .total-row{ font-weight:bold; background: #fbfdfc; }
 
-    /* Leader = lowest score winner */
-    .leader{
-      background: #fff7db; /* soft yellow highlight */
-    }
+    .leader{ background: #fff7db; } /* soft yellow */
 
     .player-header{
       display:inline-flex;
@@ -207,7 +188,7 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 10px 12px;
-      min-width: 220px;
+      min-width: 240px;
       box-shadow: 0 1px 0 rgba(0,0,0,0.03);
     }
 
@@ -221,6 +202,35 @@
       font-size: 18px;
       font-weight: bold;
       color: var(--green-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--green-100);
+      font-size: 18px;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .badge.trophy{
+      background: #fff2c9;
+      border-color: #f1d37b;
+    }
+
+    .badge.oops{
+      background: #ffe7e5;
+      border-color: #f2c7c4;
     }
   </style>
 </head>
@@ -463,7 +473,6 @@
       totals
     });
 
-    // Next game locally
     local.scores = local.players.map(() => Array(ROUNDS).fill(null));
     saveLocal();
     renderScorecard();
@@ -480,14 +489,22 @@
   }
   window._deleteGame = deleteGame;
 
-  // History summaries + leaderboard
+  // Summary: best winning score + worst single-player score, with player names
   function computeHistorySummary(){
-    if (!history.length) return { bestWin: null, worstAny: null, games: 0 };
+    if (!history.length) {
+      return {
+        bestWin: null,
+        bestWinPlayer: null,
+        worstAny: null,
+        worstAnyPlayer: null,
+        games: 0
+      };
+    }
 
-    // Best game score = lowest winning score across all games
-    // Worst score = highest single-player score across all games
     let bestWin = null;
+    let bestWinPlayer = null;
     let worstAny = null;
+    let worstAnyPlayer = null;
 
     history.forEach(g => {
       const winners = new Set(g.winners || []);
@@ -495,14 +512,29 @@
         const score = Number(t.total) || 0;
         const name = t.name;
 
+        // Best game score = lowest winning score
         if (winners.has(name)) {
-          if (bestWin === null || score < bestWin) bestWin = score;
+          if (bestWin === null || score < bestWin) {
+            bestWin = score;
+            bestWinPlayer = name;
+          }
         }
-        if (worstAny === null || score > worstAny) worstAny = score;
+
+        // Worst score = highest single-player total
+        if (worstAny === null || score > worstAny) {
+          worstAny = score;
+          worstAnyPlayer = name;
+        }
       });
     });
 
-    return { bestWin, worstAny, games: history.length };
+    return {
+      bestWin,
+      bestWinPlayer,
+      worstAny,
+      worstAnyPlayer,
+      games: history.length
+    };
   }
 
   function renderAllTimeLeaderboard(){
@@ -526,7 +558,7 @@
       const winPct = p.games ? (p.wins / p.games) : 0;
       return { ...p, avg, winPct };
     })
-    .sort((a,b) => (b.wins - a.wins) || (b.winPct - a.winPct) || (a.avg - b.avg)); // golf logic
+    .sort((a,b) => (b.wins - a.wins) || (b.winPct - a.winPct) || (a.avg - b.avg));
 
     if (!rows.length) return "<p class='muted'>No games yet.</p>";
 
@@ -565,19 +597,38 @@
 
     const summary = computeHistorySummary();
 
+    const bestText = summary.bestWin !== null
+      ? `${summary.bestWin} (${escapeHtml(summary.bestWinPlayer)})`
+      : "—";
+
+    const worstText = summary.worstAny !== null
+      ? `${summary.worstAny} (${escapeHtml(summary.worstAnyPlayer)})`
+      : "—";
+
     historyView.innerHTML = `
       <div class="summary-cards">
         <div class="card">
           <div class="label">All-time Best Game Score (lowest winning score)</div>
-          <div class="value">${summary.bestWin ?? "—"}</div>
+          <div class="value">
+            <span class="badge trophy" title="Best score">🏆</span>
+            <span>${bestText}</span>
+          </div>
         </div>
+
         <div class="card">
           <div class="label">All-time Worst Score (highest single-player total)</div>
-          <div class="value">${summary.worstAny ?? "—"}</div>
+          <div class="value">
+            <span class="badge oops" title="Worst score">😬</span>
+            <span>${worstText}</span>
+          </div>
         </div>
+
         <div class="card">
           <div class="label">Games Recorded</div>
-          <div class="value">${summary.games}</div>
+          <div class="value">
+            <span class="badge" title="Games">⛳</span>
+            <span>${summary.games}</span>
+          </div>
         </div>
       </div>
 
