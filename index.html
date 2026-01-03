@@ -6,30 +6,222 @@
   <title>Play Nine Scorecard</title>
 
   <style>
-    body { font-family: Arial, sans-serif; background:#f5f5f5; padding:10px; }
-    h1,h2 { text-align:center; }
+    :root{
+      --green-900:#0b3d2e;
+      --green-700:#0f5a43;
+      --green-600:#146b4f;
+      --green-100:#e7f5ee;
 
-    #tabs { display:flex; justify-content:center; margin-bottom:10px; }
-    #tabs button { padding:8px 12px; margin:0 5px; font-size:14px; }
-    .active-tab { font-weight:bold; background:#ddd; }
+      --yellow-500:#f6c343;
+      --yellow-200:#ffe8a3;
 
-    #controls { text-align:center; margin-bottom:10px; }
-    input, button { font-size:14px; padding:6px; margin:2px; }
+      --paper:#f7fbf8;
+      --card:#ffffff;
+
+      --border:#d7e6dd;
+      --muted:#4f6b5d;
+      --danger:#b42318;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--paper);
+      padding: 10px;
+      color: var(--green-900);
+    }
+
+    h1, h2 { text-align: center; margin: 10px 0; }
+
+    h1{
+      color: var(--green-900);
+      letter-spacing: 0.3px;
+    }
+
+    #tabs {
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      margin: 10px 0 12px;
+    }
+
+    #tabs button{
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--green-900);
+      padding: 8px 14px;
+      font-size: 14px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    #tabs button:hover{
+      border-color: var(--green-600);
+    }
+
+    .active-tab{
+      background: var(--green-700) !important;
+      color: white !important;
+      border-color: var(--green-700) !important;
+      font-weight: bold;
+    }
+
+    #controls{
+      text-align:center;
+      margin-bottom: 10px;
+    }
+
+    input, button{
+      font-size: 14px;
+      padding: 7px 10px;
+      margin: 2px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    input{
+      background: var(--card);
+      min-width: 170px;
+    }
+
+    button{
+      cursor:pointer;
+      background: var(--green-700);
+      color: white;
+      border-color: var(--green-700);
+    }
+
+    button:hover{
+      background: var(--green-600);
+      border-color: var(--green-600);
+    }
+
+    button.secondary{
+      background: var(--yellow-500);
+      color: var(--green-900);
+      border-color: var(--yellow-500);
+      font-weight: bold;
+    }
+
+    button.secondary:hover{
+      background: var(--yellow-200);
+      border-color: var(--yellow-200);
+    }
 
     .table-wrapper { overflow-x:auto; }
-    table { width:auto; border-collapse:collapse; background:white; margin-bottom:15px; }
-    th, td { border:1px solid #ddd; padding:6px 10px; text-align:center; white-space:nowrap; }
-    th { background:#eee; }
 
-    td input { width:55px; text-align:center; }
-    .total-row { font-weight:bold; background:#fafafa; }
-    .leader { background:#d9edf7; }
+    table{
+      width:auto;
+      border-collapse:collapse;
+      background: var(--card);
+      margin: 12px auto 15px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
 
-    .player-header { display:inline-flex; align-items:center; gap:4px; }
-    .player-header button { font-size:12px; padding:2px 5px; }
+    th, td{
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      text-align:center;
+      white-space:nowrap;
+    }
 
-    .danger { color:red; }
-    .muted { color:#666; text-align:center; }
+    th{
+      background: var(--green-100);
+      color: var(--green-900);
+      font-weight: bold;
+    }
+
+    td input{
+      width: 58px;
+      text-align:center;
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--green-900);
+    }
+
+    td input:focus{
+      outline: 2px solid var(--yellow-500);
+      border-color: var(--yellow-500);
+    }
+
+    .total-row{
+      font-weight:bold;
+      background: #fbfdfc;
+    }
+
+    /* Leader = lowest score winner */
+    .leader{
+      background: #fff7db; /* soft yellow highlight */
+    }
+
+    .player-header{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .player-header button{
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--green-900);
+    }
+
+    .player-header button:hover{
+      border-color: var(--yellow-500);
+      background: var(--yellow-200);
+    }
+
+    .danger{
+      color: var(--danger);
+      background: #fff;
+      border-color: #f2c7c4;
+    }
+
+    .danger:hover{
+      background:#fde8e7;
+      border-color:#f2c7c4;
+    }
+
+    .muted{
+      color: var(--muted);
+      text-align:center;
+      margin: 10px 0;
+    }
+
+    .summary-cards{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 8px 0 12px;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      min-width: 220px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    }
+
+    .card .label{
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .card .value{
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--green-900);
+    }
   </style>
 </head>
 <body>
@@ -41,12 +233,11 @@
   <button id="historyTab">History</button>
 </div>
 
-<!-- SCORECARD -->
 <div id="scorecardView">
   <div id="controls">
     <input id="playerName" placeholder="Player name" />
     <button id="addPlayerBtn">Add Player</button>
-    <button id="endGameBtn">End Game</button>
+    <button id="endGameBtn" class="secondary">End Game</button>
     <button id="resetScoresBtn">Reset Scores</button>
   </div>
 
@@ -54,7 +245,6 @@
   <div id="ranking"></div>
 </div>
 
-<!-- HISTORY -->
 <div id="historyView" style="display:none"></div>
 
 <script type="module">
@@ -79,18 +269,18 @@
 
   const ROUNDS = 9;
 
+  // Local: current scorecard stays local (fast/offline)
   let local = JSON.parse(localStorage.getItem("playNineLocal")) || {
     players: [],
     scores: []
   };
 
-  let history = []; // shared from Firestore
+  // Shared: history lives in Firestore
+  let history = [];
 
-  function saveLocal() {
-    localStorage.setItem("playNineLocal", JSON.stringify(local));
-  }
+  function saveLocal(){ localStorage.setItem("playNineLocal", JSON.stringify(local)); }
 
-  // --------- Tabs ----------
+  // Tabs
   const scorecardView = document.getElementById("scorecardView");
   const historyView = document.getElementById("historyView");
   const scoreTab = document.getElementById("scoreTab");
@@ -99,14 +289,14 @@
   scoreTab.onclick = () => showScorecard();
   historyTab.onclick = () => showHistory();
 
-  function showScorecard() {
+  function showScorecard(){
     scorecardView.style.display = "block";
     historyView.style.display = "none";
     scoreTab.classList.add("active-tab");
     historyTab.classList.remove("active-tab");
   }
 
-  async function showHistory() {
+  async function showHistory(){
     scorecardView.style.display = "none";
     historyView.style.display = "block";
     historyTab.classList.add("active-tab");
@@ -115,12 +305,12 @@
     renderHistory();
   }
 
-  // --------- Scorecard logic ----------
+  // Controls
   document.getElementById("addPlayerBtn").onclick = addPlayer;
   document.getElementById("endGameBtn").onclick = endGame;
   document.getElementById("resetScoresBtn").onclick = resetScores;
 
-  function addPlayer() {
+  function addPlayer(){
     const input = document.getElementById("playerName");
     const name = input.value.trim();
     if (!name) return;
@@ -133,71 +323,69 @@
     renderScorecard();
   }
 
-  function renamePlayer(i) {
+  function renamePlayer(i){
     const name = prompt("Rename player:", local.players[i]);
     if (!name) return;
-
     local.players[i] = name.trim();
     saveLocal();
     renderScorecard();
   }
 
-  function deletePlayer(i) {
+  function deletePlayer(i){
     if (!confirm("Delete this player and all current scores?")) return;
-
     local.players.splice(i, 1);
     local.scores.splice(i, 1);
     saveLocal();
     renderScorecard();
   }
 
-  function updateScore(p, r, value) {
+  function updateScore(p, r, value){
     local.scores[p][r] = value === "" ? null : Number(value);
     saveLocal();
     renderScorecard();
   }
 
-  function getTotal(i) {
-    return local.scores[i]
-      .filter(v => v !== null)
-      .reduce((a, b) => a + b, 0);
+  function getTotal(i){
+    return local.scores[i].filter(v => v !== null).reduce((a,b) => a+b, 0);
   }
 
-  // Lowest total wins
-  function getLeaders() {
+  // Lowest wins
+  function getLeaders(){
     const totals = local.players.map((_, i) => getTotal(i));
     const min = Math.min(...totals);
     return totals.map(t => t === min);
   }
 
-  function resetScores() {
+  function resetScores(){
     if (!confirm("Clear current scores?")) return;
     local.scores = local.players.map(() => Array(ROUNDS).fill(null));
     saveLocal();
     renderScorecard();
   }
 
-  function renderCurrentRanking() {
+  function renderCurrentRanking(){
     const ranking = local.players
       .map((name, i) => ({ name, total: getTotal(i) }))
-      .sort((a, b) => a.total - b.total);
+      .sort((a,b) => a.total - b.total);
 
     return `
       <h2>Current Rankings</h2>
-      <table>
-        <tr><th>Position</th><th>Player</th><th>Total</th></tr>
-        ${ranking.map((p, i) =>
-          `<tr><td>${i + 1}</td><td>${escapeHtml(p.name)}</td><td>${p.total}</td></tr>`
-        ).join("")}
-      </table>
+      <div class="table-wrapper">
+        <table>
+          <tr><th>Position</th><th>Player</th><th>Total</th></tr>
+          ${ranking.map((p,i) =>
+            `<tr><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td>${p.total}</td></tr>`
+          ).join("")}
+        </table>
+      </div>
     `;
   }
 
-  function renderScorecard() {
+  function renderScorecard(){
     const table = document.getElementById("tableContainer");
     const rankingDiv = document.getElementById("ranking");
 
-    if (!local.players.length) {
+    if (!local.players.length){
       table.innerHTML = "<p class='muted'>Add players to begin</p>";
       rankingDiv.innerHTML = "";
       return;
@@ -206,7 +394,7 @@
     const leaders = getLeaders();
 
     let html = "<table><tr><th>Round</th>";
-    local.players.forEach((p, i) => {
+    local.players.forEach((p,i) => {
       html += `
         <th class="${leaders[i] ? "leader" : ""}">
           <span class="player-header">
@@ -218,8 +406,8 @@
     });
     html += "</tr>";
 
-    for (let r = 0; r < ROUNDS; r++) {
-      html += `<tr><td>Round ${r + 1}</td>`;
+    for (let r=0; r<ROUNDS; r++){
+      html += `<tr><td>Round ${r+1}</td>`;
       local.players.forEach((_, p) => {
         html += `
           <td class="${leaders[p] ? "leader" : ""}">
@@ -245,22 +433,22 @@
   window._deletePlayer = deletePlayer;
   window._updateScore = updateScore;
 
-  // --------- Firestore (shared history) ----------
-  async function loadHistoryFromCloud() {
+  // Firestore
+  async function loadHistoryFromCloud(){
     const q = query(collection(db, "games"), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
     history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 
-  async function saveGameToCloud(game) {
+  async function saveGameToCloud(game){
     await addDoc(collection(db, "games"), game);
   }
 
-  async function deleteGameFromCloud(gameId) {
+  async function deleteGameFromCloud(gameId){
     await deleteDoc(doc(db, "games", gameId));
   }
 
-  async function endGame() {
+  async function endGame(){
     if (!local.players.length) return;
     if (!confirm("End game and save results to shared history?")) return;
 
@@ -268,14 +456,12 @@
     const min = Math.min(...totals.map(t => t.total));
     const winners = totals.filter(t => t.total === min).map(t => t.name);
 
-    const game = {
+    await saveGameToCloud({
       createdAt: serverTimestamp(),
       dateLabel: new Date().toLocaleString(),
       winners,
       totals
-    };
-
-    await saveGameToCloud(game);
+    });
 
     // Next game locally
     local.scores = local.players.map(() => Array(ROUNDS).fill(null));
@@ -283,7 +469,7 @@
     renderScorecard();
   }
 
-  async function deleteGame(index) {
+  async function deleteGame(index){
     const g = history[index];
     if (!g?.id) return;
     if (!confirm("Delete this game from shared history?")) return;
@@ -292,11 +478,34 @@
     await loadHistoryFromCloud();
     renderHistory();
   }
-
   window._deleteGame = deleteGame;
 
-  // --------- History rendering ----------
-  function renderAllTimeLeaderboard() {
+  // History summaries + leaderboard
+  function computeHistorySummary(){
+    if (!history.length) return { bestWin: null, worstAny: null, games: 0 };
+
+    // Best game score = lowest winning score across all games
+    // Worst score = highest single-player score across all games
+    let bestWin = null;
+    let worstAny = null;
+
+    history.forEach(g => {
+      const winners = new Set(g.winners || []);
+      (g.totals || []).forEach(t => {
+        const score = Number(t.total) || 0;
+        const name = t.name;
+
+        if (winners.has(name)) {
+          if (bestWin === null || score < bestWin) bestWin = score;
+        }
+        if (worstAny === null || score > worstAny) worstAny = score;
+      });
+    });
+
+    return { bestWin, worstAny, games: history.length };
+  }
+
+  function renderAllTimeLeaderboard(){
     const stats = {};
 
     history.forEach(g => {
@@ -305,24 +514,10 @@
         const name = t.name;
         const score = Number(t.total) || 0;
 
-        if (!stats[name]) {
-          stats[name] = {
-            name,
-            games: 0,
-            wins: 0,
-            totalScore: 0,
-            best: null,  // lowest score (best in Play Nine)
-            worst: null  // highest score
-          };
-        }
-
-        const s = stats[name];
-        s.games++;
-        s.totalScore += score;
-        if (winners.has(name)) s.wins++;
-
-        s.best = (s.best === null) ? score : Math.min(s.best, score);
-        s.worst = (s.worst === null) ? score : Math.max(s.worst, score);
+        if (!stats[name]) stats[name] = { name, games: 0, wins: 0, totalScore: 0 };
+        stats[name].games++;
+        stats[name].totalScore += score;
+        if (winners.has(name)) stats[name].wins++;
       });
     });
 
@@ -331,12 +526,7 @@
       const winPct = p.games ? (p.wins / p.games) : 0;
       return { ...p, avg, winPct };
     })
-    // Rank by wins desc, then win% desc, then avg asc (lower is better)
-    .sort((a, b) =>
-      (b.wins - a.wins) ||
-      (b.winPct - a.winPct) ||
-      (a.avg - b.avg)
-    );
+    .sort((a,b) => (b.wins - a.wins) || (b.winPct - a.winPct) || (a.avg - b.avg)); // golf logic
 
     if (!rows.length) return "<p class='muted'>No games yet.</p>";
 
@@ -351,19 +541,15 @@
             <th>Games</th>
             <th>Win %</th>
             <th>Avg</th>
-            <th>Best</th>
-            <th>Worst</th>
           </tr>
-          ${rows.map((p, i) => `
+          ${rows.map((p,i) => `
             <tr>
-              <td>${i + 1}</td>
+              <td>${i+1}</td>
               <td>${escapeHtml(p.name)}</td>
               <td>${p.wins}</td>
               <td>${p.games}</td>
               <td>${(p.winPct * 100).toFixed(0)}%</td>
               <td>${p.avg.toFixed(1)}</td>
-              <td>${p.best ?? ""}</td>
-              <td>${p.worst ?? ""}</td>
             </tr>
           `).join("")}
         </table>
@@ -371,33 +557,52 @@
     `;
   }
 
-  function renderHistory() {
-    if (!history.length) {
+  function renderHistory(){
+    if (!history.length){
       historyView.innerHTML = "<h2>No games played yet</h2>";
       return;
     }
 
+    const summary = computeHistorySummary();
+
     historyView.innerHTML = `
+      <div class="summary-cards">
+        <div class="card">
+          <div class="label">All-time Best Game Score (lowest winning score)</div>
+          <div class="value">${summary.bestWin ?? "—"}</div>
+        </div>
+        <div class="card">
+          <div class="label">All-time Worst Score (highest single-player total)</div>
+          <div class="value">${summary.worstAny ?? "—"}</div>
+        </div>
+        <div class="card">
+          <div class="label">Games Recorded</div>
+          <div class="value">${summary.games}</div>
+        </div>
+      </div>
+
       ${renderAllTimeLeaderboard()}
+
       <h2>Game History</h2>
       <div class="table-wrapper">
         <table>
           <tr><th>Date</th><th>Winner(s)</th><th>Scores</th><th></th></tr>
-          ${history.map((g, i) => `
+          ${history.map((g,i) => `
             <tr>
               <td>${escapeHtml(g.dateLabel || "")}</td>
               <td>${escapeHtml((g.winners || []).join(", "))}</td>
               <td>${escapeHtml((g.totals || []).map(t => `${t.name}: ${t.total}`).join(" | "))}</td>
-              <td><button class="danger" onclick="window._deleteGame(${i})">🗑</button></td>
+              <td><button class="danger" onclick="window._deleteGame(${i})">🗑 Delete</button></td>
             </tr>
           `).join("")}
         </table>
       </div>
+
       <p class="muted">History + leaderboard are shared (Firestore). Scorecard-in-progress stays on your device.</p>
     `;
   }
 
-  function escapeHtml(str) {
+  function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, s => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[s]));
