@@ -6,94 +6,30 @@
   <title>Play Nine Scorecard</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 10px;
-    }
+    body { font-family: Arial, sans-serif; background:#f5f5f5; padding:10px; }
+    h1,h2 { text-align:center; }
 
-    h1, h2 {
-      text-align: center;
-    }
+    #tabs { display:flex; justify-content:center; margin-bottom:10px; }
+    #tabs button { padding:8px 12px; margin:0 5px; font-size:14px; }
+    .active-tab { font-weight:bold; background:#ddd; }
 
-    #tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
+    #controls { text-align:center; margin-bottom:10px; }
+    input, button { font-size:14px; padding:6px; margin:2px; }
 
-    #tabs button {
-      padding: 8px 12px;
-      margin: 0 5px;
-      font-size: 14px;
-    }
+    .table-wrapper { overflow-x:auto; }
+    table { width:auto; border-collapse:collapse; background:white; margin-bottom:15px; }
+    th, td { border:1px solid #ddd; padding:6px 10px; text-align:center; white-space:nowrap; }
+    th { background:#eee; }
 
-    .active-tab {
-      font-weight: bold;
-      background: #ddd;
-    }
+    td input { width:55px; text-align:center; }
+    .total-row { font-weight:bold; background:#fafafa; }
+    .leader { background:#d9edf7; }
 
-    #controls {
-      text-align: center;
-      margin-bottom: 10px;
-    }
+    .player-header { display:inline-flex; align-items:center; gap:4px; }
+    .player-header button { font-size:12px; padding:2px 5px; }
 
-    input, button {
-      font-size: 14px;
-      padding: 6px;
-      margin: 2px;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: auto;
-      border-collapse: collapse;
-      background: white;
-      margin-bottom: 15px;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px 10px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    th {
-      background: #eee;
-    }
-
-    td input {
-      width: 55px;
-      text-align: center;
-    }
-
-    .total-row {
-      font-weight: bold;
-      background: #fafafa;
-    }
-
-    .leader {
-      background: #d9edf7;
-    }
-
-    .player-header {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .player-header button {
-      font-size: 12px;
-      padding: 2px 5px;
-    }
-
-    .danger {
-      color: red;
-    }
+    .danger { color:red; }
+    .muted { color:#666; text-align:center; }
   </style>
 </head>
 <body>
@@ -101,17 +37,17 @@
 <h1>Play Nine Scorecard</h1>
 
 <div id="tabs">
-  <button id="scoreTab" class="active-tab" onclick="showScorecard()">Scorecard</button>
-  <button id="historyTab" onclick="showHistory()">History</button>
+  <button id="scoreTab" class="active-tab">Scorecard</button>
+  <button id="historyTab">History</button>
 </div>
 
 <!-- SCORECARD -->
 <div id="scorecardView">
   <div id="controls">
     <input id="playerName" placeholder="Player name" />
-    <button onclick="addPlayer()">Add Player</button>
-    <button onclick="endGame()">End Game</button>
-    <button onclick="resetScores()">Reset Scores</button>
+    <button id="addPlayerBtn">Add Player</button>
+    <button id="endGameBtn">End Game</button>
+    <button id="resetScoresBtn">Reset Scores</button>
   </div>
 
   <div class="table-wrapper" id="tableContainer"></div>
@@ -121,18 +57,47 @@
 <!-- HISTORY -->
 <div id="historyView" style="display:none"></div>
 
-<script>
-  const ROUNDS = 9;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
+    query, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  let data = JSON.parse(localStorage.getItem("playNine")) || {
-    players: [],
-    scores: [],
-    history: []
+  const firebaseConfig = {
+    apiKey: "AIzaSyANco7Z5TrnOEeXrReubwTxFlIsw1Sr0Ck",
+    authDomain: "play-nine-scorecard-f56ad.firebaseapp.com",
+    projectId: "play-nine-scorecard-f56ad",
+    storageBucket: "play-nine-scorecard-f56ad.firebasestorage.app",
+    messagingSenderId: "716365636842",
+    appId: "1:716365636842:web:4be3bfad6121da3abbe393",
+    measurementId: "G-XQS2D4H84E"
   };
 
-  function save() {
-    localStorage.setItem("playNine", JSON.stringify(data));
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const ROUNDS = 9;
+
+  let local = JSON.parse(localStorage.getItem("playNineLocal")) || {
+    players: [],
+    scores: []
+  };
+
+  let history = []; // shared from Firestore
+
+  function saveLocal() {
+    localStorage.setItem("playNineLocal", JSON.stringify(local));
   }
+
+  // --------- Tabs ----------
+  const scorecardView = document.getElementById("scorecardView");
+  const historyView = document.getElementById("historyView");
+  const scoreTab = document.getElementById("scoreTab");
+  const historyTab = document.getElementById("historyTab");
+
+  scoreTab.onclick = () => showScorecard();
+  historyTab.onclick = () => showHistory();
 
   function showScorecard() {
     scorecardView.style.display = "block";
@@ -141,83 +106,79 @@
     historyTab.classList.remove("active-tab");
   }
 
-  function showHistory() {
+  async function showHistory() {
     scorecardView.style.display = "none";
     historyView.style.display = "block";
     historyTab.classList.add("active-tab");
     scoreTab.classList.remove("active-tab");
+    await loadHistoryFromCloud();
     renderHistory();
   }
 
+  // --------- Scorecard logic ----------
+  document.getElementById("addPlayerBtn").onclick = addPlayer;
+  document.getElementById("endGameBtn").onclick = endGame;
+  document.getElementById("resetScoresBtn").onclick = resetScores;
+
   function addPlayer() {
     const input = document.getElementById("playerName");
-    if (!input.value) return;
-    data.players.push(input.value);
-    data.scores.push(Array(ROUNDS).fill(null));
+    const name = input.value.trim();
+    if (!name) return;
+
+    local.players.push(name);
+    local.scores.push(Array(ROUNDS).fill(null));
+
     input.value = "";
-    save();
-    render();
+    saveLocal();
+    renderScorecard();
   }
 
   function renamePlayer(i) {
-    const name = prompt("Rename player:", data.players[i]);
+    const name = prompt("Rename player:", local.players[i]);
     if (!name) return;
-    data.players[i] = name;
-    save();
-    render();
+
+    local.players[i] = name.trim();
+    saveLocal();
+    renderScorecard();
   }
 
   function deletePlayer(i) {
-    if (!confirm("Delete this player and all scores?")) return;
-    data.players.splice(i, 1);
-    data.scores.splice(i, 1);
-    save();
-    render();
+    if (!confirm("Delete this player and all current scores?")) return;
+
+    local.players.splice(i, 1);
+    local.scores.splice(i, 1);
+    saveLocal();
+    renderScorecard();
   }
 
   function updateScore(p, r, value) {
-    data.scores[p][r] = value === "" ? null : Number(value);
-    save();
-    render();
+    local.scores[p][r] = value === "" ? null : Number(value);
+    saveLocal();
+    renderScorecard();
   }
 
   function getTotal(i) {
-    return data.scores[i].filter(v => v !== null).reduce((a, b) => a + b, 0);
+    return local.scores[i]
+      .filter(v => v !== null)
+      .reduce((a, b) => a + b, 0);
   }
 
+  // Lowest total wins
   function getLeaders() {
-    const totals = data.players.map((_, i) => getTotal(i));
+    const totals = local.players.map((_, i) => getTotal(i));
     const min = Math.min(...totals);
     return totals.map(t => t === min);
   }
 
   function resetScores() {
     if (!confirm("Clear current scores?")) return;
-    data.scores = data.players.map(() => Array(ROUNDS).fill(null));
-    save();
-    render();
+    local.scores = local.players.map(() => Array(ROUNDS).fill(null));
+    saveLocal();
+    renderScorecard();
   }
 
-  function endGame() {
-    if (!confirm("End game and save results?")) return;
-
-    const totals = data.players.map((name, i) => ({ name, total: getTotal(i) }));
-    const min = Math.min(...totals.map(t => t.total));
-    const winners = totals.filter(t => t.total === min).map(t => t.name);
-
-    data.history.unshift({
-      date: new Date().toLocaleString(),
-      winners,
-      totals
-    });
-
-    data.scores = data.players.map(() => Array(ROUNDS).fill(null));
-    save();
-    render();
-  }
-
-  function renderRanking() {
-    const ranking = data.players
+  function renderCurrentRanking() {
+    const ranking = local.players
       .map((name, i) => ({ name, total: getTotal(i) }))
       .sort((a, b) => a.total - b.total);
 
@@ -226,66 +187,192 @@
       <table>
         <tr><th>Position</th><th>Player</th><th>Total</th></tr>
         ${ranking.map((p, i) =>
-          `<tr><td>${i + 1}</td><td>${p.name}</td><td>${p.total}</td></tr>`
+          `<tr><td>${i + 1}</td><td>${escapeHtml(p.name)}</td><td>${p.total}</td></tr>`
         ).join("")}
       </table>
     `;
   }
 
-  function renderAllTimeLeaderboard() {
-    const stats = {};
+  function renderScorecard() {
+    const table = document.getElementById("tableContainer");
+    const rankingDiv = document.getElementById("ranking");
 
-    data.history.forEach(g => {
-      g.totals.forEach(t => {
-        if (!stats[t.name]) {
-          stats[t.name] = { name: t.name, games: 0, wins: 0, totalScore: 0 };
-        }
-        stats[t.name].games++;
-        stats[t.name].totalScore += t.total;
-        if (g.winners.includes(t.name)) stats[t.name].wins++;
-      });
+    if (!local.players.length) {
+      table.innerHTML = "<p class='muted'>Add players to begin</p>";
+      rankingDiv.innerHTML = "";
+      return;
+    }
+
+    const leaders = getLeaders();
+
+    let html = "<table><tr><th>Round</th>";
+    local.players.forEach((p, i) => {
+      html += `
+        <th class="${leaders[i] ? "leader" : ""}">
+          <span class="player-header">
+            ${escapeHtml(p)}
+            <button onclick="window._renamePlayer(${i})">✏️</button>
+            <button onclick="window._deletePlayer(${i})">🗑</button>
+          </span>
+        </th>`;
     });
+    html += "</tr>";
 
-    const leaderboard = Object.values(stats).map(p => ({
-      ...p,
-      avg: (p.totalScore / p.games).toFixed(1)
-    }))
-    .sort((a, b) => b.wins - a.wins || a.avg - b.avg);
+    for (let r = 0; r < ROUNDS; r++) {
+      html += `<tr><td>Round ${r + 1}</td>`;
+      local.players.forEach((_, p) => {
+        html += `
+          <td class="${leaders[p] ? "leader" : ""}">
+            <input type="number"
+                   value="${local.scores[p][r] ?? ""}"
+                   onchange="window._updateScore(${p}, ${r}, this.value)">
+          </td>`;
+      });
+      html += "</tr>";
+    }
 
-    if (!leaderboard.length) return "";
+    html += `<tr class="total-row"><td>Total</td>`;
+    local.players.forEach((_, i) => {
+      html += `<td class="${leaders[i] ? "leader" : ""}">${getTotal(i)}</td>`;
+    });
+    html += "</tr></table>";
 
-    return `
-      <h2>All-Time Leaderboard</h2>
-      <table>
-        <tr>
-          <th>Rank</th>
-          <th>Player</th>
-          <th>Wins</th>
-          <th>Games</th>
-          <th>Avg Score</th>
-        </tr>
-        ${leaderboard.map((p, i) =>
-          `<tr>
-            <td>${i + 1}</td>
-            <td>${p.name}</td>
-            <td>${p.wins}</td>
-            <td>${p.games}</td>
-            <td>${p.avg}</td>
-          </tr>`
-        ).join("")}
-      </table>
-    `;
+    table.innerHTML = html;
+    rankingDiv.innerHTML = renderCurrentRanking();
   }
 
-  function deleteGame(index) {
-    if (!confirm("Delete this game from history?")) return;
-    data.history.splice(index, 1);
-    save();
+  window._renamePlayer = renamePlayer;
+  window._deletePlayer = deletePlayer;
+  window._updateScore = updateScore;
+
+  // --------- Firestore (shared history) ----------
+  async function loadHistoryFromCloud() {
+    const q = query(collection(db, "games"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  async function saveGameToCloud(game) {
+    await addDoc(collection(db, "games"), game);
+  }
+
+  async function deleteGameFromCloud(gameId) {
+    await deleteDoc(doc(db, "games", gameId));
+  }
+
+  async function endGame() {
+    if (!local.players.length) return;
+    if (!confirm("End game and save results to shared history?")) return;
+
+    const totals = local.players.map((name, i) => ({ name, total: getTotal(i) }));
+    const min = Math.min(...totals.map(t => t.total));
+    const winners = totals.filter(t => t.total === min).map(t => t.name);
+
+    const game = {
+      createdAt: serverTimestamp(),
+      dateLabel: new Date().toLocaleString(),
+      winners,
+      totals
+    };
+
+    await saveGameToCloud(game);
+
+    // Next game locally
+    local.scores = local.players.map(() => Array(ROUNDS).fill(null));
+    saveLocal();
+    renderScorecard();
+  }
+
+  async function deleteGame(index) {
+    const g = history[index];
+    if (!g?.id) return;
+    if (!confirm("Delete this game from shared history?")) return;
+
+    await deleteGameFromCloud(g.id);
+    await loadHistoryFromCloud();
     renderHistory();
   }
 
+  window._deleteGame = deleteGame;
+
+  // --------- History rendering ----------
+  function renderAllTimeLeaderboard() {
+    const stats = {};
+
+    history.forEach(g => {
+      const winners = new Set(g.winners || []);
+      (g.totals || []).forEach(t => {
+        const name = t.name;
+        const score = Number(t.total) || 0;
+
+        if (!stats[name]) {
+          stats[name] = {
+            name,
+            games: 0,
+            wins: 0,
+            totalScore: 0,
+            best: null,  // lowest score (best in Play Nine)
+            worst: null  // highest score
+          };
+        }
+
+        const s = stats[name];
+        s.games++;
+        s.totalScore += score;
+        if (winners.has(name)) s.wins++;
+
+        s.best = (s.best === null) ? score : Math.min(s.best, score);
+        s.worst = (s.worst === null) ? score : Math.max(s.worst, score);
+      });
+    });
+
+    const rows = Object.values(stats).map(p => {
+      const avg = p.games ? (p.totalScore / p.games) : 0;
+      const winPct = p.games ? (p.wins / p.games) : 0;
+      return { ...p, avg, winPct };
+    })
+    // Rank by wins desc, then win% desc, then avg asc (lower is better)
+    .sort((a, b) =>
+      (b.wins - a.wins) ||
+      (b.winPct - a.winPct) ||
+      (a.avg - b.avg)
+    );
+
+    if (!rows.length) return "<p class='muted'>No games yet.</p>";
+
+    return `
+      <h2>All-Time Leaderboard</h2>
+      <div class="table-wrapper">
+        <table>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Wins</th>
+            <th>Games</th>
+            <th>Win %</th>
+            <th>Avg</th>
+            <th>Best</th>
+            <th>Worst</th>
+          </tr>
+          ${rows.map((p, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${escapeHtml(p.name)}</td>
+              <td>${p.wins}</td>
+              <td>${p.games}</td>
+              <td>${(p.winPct * 100).toFixed(0)}%</td>
+              <td>${p.avg.toFixed(1)}</td>
+              <td>${p.best ?? ""}</td>
+              <td>${p.worst ?? ""}</td>
+            </tr>
+          `).join("")}
+        </table>
+      </div>
+    `;
+  }
+
   function renderHistory() {
-    if (!data.history.length) {
+    if (!history.length) {
       historyView.innerHTML = "<h2>No games played yet</h2>";
       return;
     }
@@ -293,73 +380,31 @@
     historyView.innerHTML = `
       ${renderAllTimeLeaderboard()}
       <h2>Game History</h2>
-      <table>
-        <tr>
-          <th>Date</th>
-          <th>Winner(s)</th>
-          <th>Scores</th>
-          <th></th>
-        </tr>
-        ${data.history.map((g, i) =>
-          `<tr>
-            <td>${g.date}</td>
-            <td>${g.winners.join(", ")}</td>
-            <td>${g.totals.map(t => `${t.name}: ${t.total}`).join(" | ")}</td>
-            <td><button class="danger" onclick="deleteGame(${i})">🗑</button></td>
-          </tr>`
-        ).join("")}
-      </table>
+      <div class="table-wrapper">
+        <table>
+          <tr><th>Date</th><th>Winner(s)</th><th>Scores</th><th></th></tr>
+          ${history.map((g, i) => `
+            <tr>
+              <td>${escapeHtml(g.dateLabel || "")}</td>
+              <td>${escapeHtml((g.winners || []).join(", "))}</td>
+              <td>${escapeHtml((g.totals || []).map(t => `${t.name}: ${t.total}`).join(" | "))}</td>
+              <td><button class="danger" onclick="window._deleteGame(${i})">🗑</button></td>
+            </tr>
+          `).join("")}
+        </table>
+      </div>
+      <p class="muted">History + leaderboard are shared (Firestore). Scorecard-in-progress stays on your device.</p>
     `;
   }
 
-  function render() {
-    const table = document.getElementById("tableContainer");
-
-    if (!data.players.length) {
-      table.innerHTML = "<p style='text-align:center'>Add players to begin</p>";
-      return;
-    }
-
-    const leaders = getLeaders();
-    let html = "<table><tr><th>Round</th>";
-
-    data.players.forEach((p, i) => {
-      html += `
-        <th class="${leaders[i] ? 'leader' : ''}">
-          <span class="player-header">
-            ${p}
-            <button onclick="renamePlayer(${i})">✏️</button>
-            <button onclick="deletePlayer(${i})">🗑</button>
-          </span>
-        </th>`;
-    });
-
-    html += "</tr>";
-
-    for (let r = 0; r < ROUNDS; r++) {
-      html += `<tr><td>Round ${r + 1}</td>`;
-      data.players.forEach((_, p) => {
-        html += `
-          <td class="${leaders[p] ? 'leader' : ''}">
-            <input type="number"
-                   value="${data.scores[p][r] ?? ""}"
-                   onchange="updateScore(${p}, ${r}, this.value)">
-          </td>`;
-      });
-      html += "</tr>";
-    }
-
-    html += `<tr class="total-row"><td>Total</td>`;
-    data.players.forEach((_, i) => {
-      html += `<td class="${leaders[i] ? 'leader' : ''}">${getTotal(i)}</td>`;
-    });
-    html += "</tr></table>";
-
-    table.innerHTML = html;
-    document.getElementById("ranking").innerHTML = renderRanking();
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[s]));
   }
 
-  render();
+  // Initial render
+  renderScorecard();
 </script>
 
 </body>
