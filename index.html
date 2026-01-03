@@ -9,35 +9,57 @@
     body {
       font-family: Arial, sans-serif;
       background: #f5f5f5;
-      padding: 15px;
+      padding: 10px;
     }
 
     h1, h2 {
       text-align: center;
     }
 
+    #tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    #tabs button {
+      padding: 8px 12px;
+      margin: 0 5px;
+      font-size: 14px;
+    }
+
+    .active-tab {
+      font-weight: bold;
+      background: #ddd;
+    }
+
     #controls {
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     input, button {
-      padding: 6px;
       font-size: 14px;
+      padding: 6px;
       margin: 2px;
     }
 
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
     table {
-      width: 100%;
+      width: auto;
       border-collapse: collapse;
       background: white;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     th, td {
       border: 1px solid #ddd;
-      padding: 6px;
+      padding: 6px 10px;
       text-align: center;
+      white-space: nowrap;
     }
 
     th {
@@ -45,7 +67,7 @@
     }
 
     td input {
-      width: 60px;
+      width: 55px;
       text-align: center;
     }
 
@@ -59,15 +81,14 @@
     }
 
     .player-header {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 4px;
     }
 
     .player-header button {
       font-size: 12px;
-      padding: 2px 6px;
+      padding: 2px 5px;
     }
   </style>
 </head>
@@ -75,16 +96,28 @@
 
 <h1>Play Nine Scorecard</h1>
 
-<div id="controls">
-  <input id="playerName" placeholder="Player name" />
-  <button onclick="addPlayer()">Add Player</button>
-  <button onclick="endGame()">End Game</button>
-  <button onclick="resetScores()">Reset Scores</button>
+<div id="tabs">
+  <button id="scoreTab" class="active-tab" onclick="showScorecard()">Scorecard</button>
+  <button id="historyTab" onclick="showHistory()">History</button>
 </div>
 
-<div id="tableContainer"></div>
-<div id="ranking"></div>
-<div id="history"></div>
+<!-- SCORECARD VIEW -->
+<div id="scorecardView">
+
+  <div id="controls">
+    <input id="playerName" placeholder="Player name" />
+    <button onclick="addPlayer()">Add Player</button>
+    <button onclick="endGame()">End Game</button>
+    <button onclick="resetScores()">Reset Scores</button>
+  </div>
+
+  <div class="table-wrapper" id="tableContainer"></div>
+  <div id="ranking"></div>
+
+</div>
+
+<!-- HISTORY VIEW -->
+<div id="historyView" style="display:none"></div>
 
 <script>
   const ROUNDS = 9;
@@ -99,10 +132,24 @@
     localStorage.setItem("playNine", JSON.stringify(data));
   }
 
+  function showScorecard() {
+    scorecardView.style.display = "block";
+    historyView.style.display = "none";
+    scoreTab.classList.add("active-tab");
+    historyTab.classList.remove("active-tab");
+  }
+
+  function showHistory() {
+    scorecardView.style.display = "none";
+    historyView.style.display = "block";
+    historyTab.classList.add("active-tab");
+    scoreTab.classList.remove("active-tab");
+    renderHistory();
+  }
+
   function addPlayer() {
     const input = document.getElementById("playerName");
     if (!input.value) return;
-
     data.players.push(input.value);
     data.scores.push(Array(ROUNDS).fill(null));
     input.value = "";
@@ -133,9 +180,7 @@
   }
 
   function getTotal(i) {
-    return data.scores[i]
-      .filter(v => v !== null)
-      .reduce((a, b) => a + b, 0);
+    return data.scores[i].filter(v => v !== null).reduce((a, b) => a + b, 0);
   }
 
   function getLeaders() {
@@ -154,11 +199,7 @@
   function endGame() {
     if (!confirm("End game and save results?")) return;
 
-    const totals = data.players.map((name, i) => ({
-      name,
-      total: getTotal(i)
-    }));
-
+    const totals = data.players.map((name, i) => ({ name, total: getTotal(i) }));
     const min = Math.min(...totals.map(t => t.total));
     const winners = totals.filter(t => t.total === min).map(t => t.name);
 
@@ -190,9 +231,12 @@
   }
 
   function renderHistory() {
-    if (!data.history.length) return "";
+    if (!data.history.length) {
+      historyView.innerHTML = "<h2>No games played yet</h2>";
+      return;
+    }
 
-    return `
+    historyView.innerHTML = `
       <h2>Game History</h2>
       <table>
         <tr><th>Date</th><th>Winner(s)</th><th>Scores</th></tr>
@@ -208,7 +252,6 @@
   }
 
   function render() {
-    const leaders = getLeaders();
     const table = document.getElementById("tableContainer");
 
     if (!data.players.length) {
@@ -216,16 +259,18 @@
       return;
     }
 
+    const leaders = getLeaders();
+
     let html = "<table><tr><th>Round</th>";
 
     data.players.forEach((p, i) => {
       html += `
         <th class="${leaders[i] ? 'leader' : ''}">
-          <div class="player-header">
+          <span class="player-header">
             ${p}
             <button onclick="renamePlayer(${i})">✏️</button>
             <button onclick="deletePlayer(${i})">🗑</button>
-          </div>
+          </span>
         </th>`;
     });
 
@@ -252,7 +297,6 @@
 
     table.innerHTML = html;
     document.getElementById("ranking").innerHTML = renderRanking();
-    document.getElementById("history").innerHTML = renderHistory();
   }
 
   render();
