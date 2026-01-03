@@ -23,22 +23,10 @@
       --danger:#b42318;
     }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: var(--paper);
-      padding: 10px;
-      color: var(--green-900);
-    }
-
+    body { font-family: Arial, sans-serif; background: var(--paper); padding: 10px; color: var(--green-900); }
     h1, h2 { text-align: center; margin: 10px 0; }
 
-    #tabs {
-      display:flex;
-      justify-content:center;
-      gap:8px;
-      margin: 10px 0 12px;
-    }
-
+    #tabs { display:flex; justify-content:center; gap:8px; margin: 10px 0 12px; }
     #tabs button{
       border: 1px solid var(--border);
       background: var(--card);
@@ -48,7 +36,6 @@
       border-radius: 999px;
       cursor: pointer;
     }
-
     #tabs button:hover{ border-color: var(--green-600); }
 
     .active-tab{
@@ -67,7 +54,6 @@
       border-radius: 10px;
       border: 1px solid var(--border);
     }
-
     input{ background: var(--card); min-width: 170px; }
 
     button{
@@ -76,11 +62,7 @@
       color: white;
       border-color: var(--green-700);
     }
-
-    button:hover{
-      background: var(--green-600);
-      border-color: var(--green-600);
-    }
+    button:hover{ background: var(--green-600); border-color: var(--green-600); }
 
     button.secondary{
       background: var(--yellow-500);
@@ -88,10 +70,20 @@
       border-color: var(--yellow-500);
       font-weight: bold;
     }
-
     button.secondary:hover{
       background: var(--yellow-200);
       border-color: var(--yellow-200);
+    }
+
+    button.light{
+      background: var(--card);
+      color: var(--green-900);
+      border-color: var(--border);
+      font-weight: bold;
+    }
+    button.light:hover{
+      border-color: var(--yellow-500);
+      background: var(--yellow-200);
     }
 
     .table-wrapper { overflow-x:auto; }
@@ -105,19 +97,8 @@
       border-radius: 14px;
       overflow: hidden;
     }
-
-    th, td{
-      border: 1px solid var(--border);
-      padding: 7px 10px;
-      text-align:center;
-      white-space:nowrap;
-    }
-
-    th{
-      background: var(--green-100);
-      color: var(--green-900);
-      font-weight: bold;
-    }
+    th, td{ border: 1px solid var(--border); padding: 7px 10px; text-align:center; white-space:nowrap; }
+    th{ background: var(--green-100); color: var(--green-900); font-weight: bold; }
 
     td input{
       width: 58px;
@@ -128,22 +109,12 @@
       background: #fff;
       color: var(--green-900);
     }
-
-    td input:focus{
-      outline: 2px solid var(--yellow-500);
-      border-color: var(--yellow-500);
-    }
+    td input:focus{ outline: 2px solid var(--yellow-500); border-color: var(--yellow-500); }
 
     .total-row{ font-weight:bold; background: #fbfdfc; }
+    .leader{ background: #fff7db; } /* lowest leader highlight */
 
-    .leader{ background: #fff7db; } /* soft yellow */
-
-    .player-header{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-
+    .player-header{ display:inline-flex; align-items:center; gap:6px; }
     .player-header button{
       font-size: 12px;
       padding: 2px 6px;
@@ -152,28 +123,17 @@
       background: #fff;
       color: var(--green-900);
     }
-
-    .player-header button:hover{
-      border-color: var(--yellow-500);
-      background: var(--yellow-200);
-    }
+    .player-header button:hover{ border-color: var(--yellow-500); background: var(--yellow-200); }
 
     .danger{
       color: var(--danger);
       background: #fff;
       border-color: #f2c7c4;
+      font-weight: bold;
     }
+    .danger:hover{ background:#fde8e7; border-color:#f2c7c4; }
 
-    .danger:hover{
-      background:#fde8e7;
-      border-color:#f2c7c4;
-    }
-
-    .muted{
-      color: var(--muted);
-      text-align:center;
-      margin: 10px 0;
-    }
+    .muted{ color: var(--muted); text-align:center; margin: 10px 0; }
 
     .summary-cards{
       display:flex;
@@ -188,16 +148,11 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 10px 12px;
-      min-width: 240px;
+      min-width: 260px;
       box-shadow: 0 1px 0 rgba(0,0,0,0.03);
     }
 
-    .card .label{
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-
+    .card .label{ color: var(--muted); font-size: 12px; margin-bottom: 4px; }
     .card .value{
       font-size: 18px;
       font-weight: bold;
@@ -222,15 +177,15 @@
       line-height: 1;
       flex: 0 0 auto;
     }
+    .badge.trophy{ background: #fff2c9; border-color: #f1d37b; }
+    .badge.oops{ background: #ffe7e5; border-color: #f2c7c4; }
 
-    .badge.trophy{
-      background: #fff2c9;
-      border-color: #f1d37b;
-    }
-
-    .badge.oops{
-      background: #ffe7e5;
-      border-color: #f2c7c4;
+    .history-actions{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap: wrap;
+      margin: 6px 0 12px;
     }
   </style>
 </head>
@@ -260,10 +215,13 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
-    getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
-    query, orderBy, serverTimestamp
+    getFirestore, collection, addDoc, getDocs, updateDoc, doc,
+    query, orderBy, where, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+  // IMPORTANT:
+  // Your Firestore rules have the passcode string hard-coded.
+  // You’ll enter the same passcode in the app when prompted.
   const firebaseConfig = {
     apiKey: "AIzaSyANco7Z5TrnOEeXrReubwTxFlIsw1Sr0Ck",
     authDomain: "play-nine-scorecard-f56ad.firebaseapp.com",
@@ -282,13 +240,35 @@
   // Local: current scorecard stays local (fast/offline)
   let local = JSON.parse(localStorage.getItem("playNineLocal")) || {
     players: [],
-    scores: []
+    scores: [] // number or null (blank)
   };
 
   // Shared: history lives in Firestore
   let history = [];
 
   function saveLocal(){ localStorage.setItem("playNineLocal", JSON.stringify(local)); }
+
+  // Passcode helpers (stored per device)
+  function getPasscode() {
+    return localStorage.getItem("playNinePasscode") || "";
+  }
+
+  function requirePasscode() {
+    let code = getPasscode();
+    if (!code) {
+      code = prompt("Enter family passcode to save/delete history:");
+      if (!code) return null;
+      localStorage.setItem("playNinePasscode", code);
+    }
+    return code;
+  }
+
+  function changePasscode() {
+    const code = prompt("Set/update family passcode on this device:");
+    if (!code) return;
+    localStorage.setItem("playNinePasscode", code);
+    alert("Passcode updated on this device.");
+  }
 
   // Tabs
   const scorecardView = document.getElementById("scorecardView");
@@ -443,36 +423,39 @@
   window._deletePlayer = deletePlayer;
   window._updateScore = updateScore;
 
-  // Firestore
+  // Firestore (shared history)
   async function loadHistoryFromCloud(){
-    const q = query(collection(db, "games"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "games"),
+      where("deleted", "==", false),
+      orderBy("createdAt", "desc")
+    );
     const snap = await getDocs(q);
     history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 
-  async function saveGameToCloud(game){
-    await addDoc(collection(db, "games"), game);
-  }
-
-  async function deleteGameFromCloud(gameId){
-    await deleteDoc(doc(db, "games", gameId));
-  }
-
   async function endGame(){
     if (!local.players.length) return;
+
+    const passcode = requirePasscode();
+    if (!passcode) return;
+
     if (!confirm("End game and save results to shared history?")) return;
 
     const totals = local.players.map((name, i) => ({ name, total: getTotal(i) }));
     const min = Math.min(...totals.map(t => t.total));
     const winners = totals.filter(t => t.total === min).map(t => t.name);
 
-    await saveGameToCloud({
+    await addDoc(collection(db, "games"), {
       createdAt: serverTimestamp(),
       dateLabel: new Date().toLocaleString(),
       winners,
-      totals
+      totals,
+      deleted: false,
+      passcode
     });
 
+    // Next game locally
     local.scores = local.players.map(() => Array(ROUNDS).fill(null));
     saveLocal();
     renderScorecard();
@@ -481,9 +464,18 @@
   async function deleteGame(index){
     const g = history[index];
     if (!g?.id) return;
+
+    const passcode = requirePasscode();
+    if (!passcode) return;
+
     if (!confirm("Delete this game from shared history?")) return;
 
-    await deleteGameFromCloud(g.id);
+    // Soft delete (works with rules)
+    await updateDoc(doc(db, "games", g.id), {
+      deleted: true,
+      passcode
+    });
+
     await loadHistoryFromCloud();
     renderHistory();
   }
@@ -492,19 +484,11 @@
   // Summary: best winning score + worst single-player score, with player names
   function computeHistorySummary(){
     if (!history.length) {
-      return {
-        bestWin: null,
-        bestWinPlayer: null,
-        worstAny: null,
-        worstAnyPlayer: null,
-        games: 0
-      };
+      return { bestWin: null, bestWinPlayer: null, worstAny: null, worstAnyPlayer: null, games: 0 };
     }
 
-    let bestWin = null;
-    let bestWinPlayer = null;
-    let worstAny = null;
-    let worstAnyPlayer = null;
+    let bestWin = null, bestWinPlayer = null;
+    let worstAny = null, worstAnyPlayer = null;
 
     history.forEach(g => {
       const winners = new Set(g.winners || []);
@@ -512,7 +496,6 @@
         const score = Number(t.total) || 0;
         const name = t.name;
 
-        // Best game score = lowest winning score
         if (winners.has(name)) {
           if (bestWin === null || score < bestWin) {
             bestWin = score;
@@ -520,7 +503,6 @@
           }
         }
 
-        // Worst score = highest single-player total
         if (worstAny === null || score > worstAny) {
           worstAny = score;
           worstAnyPlayer = name;
@@ -528,13 +510,7 @@
       });
     });
 
-    return {
-      bestWin,
-      bestWinPlayer,
-      worstAny,
-      worstAnyPlayer,
-      games: history.length
-    };
+    return { bestWin, bestWinPlayer, worstAny, worstAnyPlayer, games: history.length };
   }
 
   function renderAllTimeLeaderboard(){
@@ -591,7 +567,13 @@
 
   function renderHistory(){
     if (!history.length){
-      historyView.innerHTML = "<h2>No games played yet</h2>";
+      historyView.innerHTML = `
+        <h2>No games played yet</h2>
+        <div class="history-actions">
+          <button class="light" onclick="window._changePasscode()">🔑 Change Passcode</button>
+        </div>
+        <p class="muted">History is shared in Firestore. Enter your family passcode when saving/deleting.</p>
+      `;
       return;
     }
 
@@ -606,6 +588,10 @@
       : "—";
 
     historyView.innerHTML = `
+      <div class="history-actions">
+        <button class="light" onclick="window._changePasscode()">🔑 Change Passcode</button>
+      </div>
+
       <div class="summary-cards">
         <div class="card">
           <div class="label">All-time Best Game Score (lowest winning score)</div>
@@ -658,6 +644,8 @@
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[s]));
   }
+
+  window._changePasscode = changePasscode;
 
   // Initial render
   renderScorecard();
