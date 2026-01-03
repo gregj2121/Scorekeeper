@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Score Keeper</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .player {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .score {
+      font-size: 24px;
+      margin: 0 10px;
+      width: 40px;
+      text-align: center;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 5px 12px;
+      margin: 0 2px;
+    }
+
+    #controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Score Keeper</h1>
+
+  <div id="controls">
+    <input id="playerName" placeholder="Player name" />
+    <button onclick="addPlayer()">Add Player</button>
+    <br/><br/>
+    <button onclick="resetScores()">Reset Game</button>
+  </div>
+
+  <div id="players"></div>
+
+  <script>
+    let players = JSON.parse(localStorage.getItem("players")) || [];
+
+    function save() {
+      localStorage.setItem("players", JSON.stringify(players));
+    }
+
+    function render() {
+      const container = document.getElementById("players");
+      container.innerHTML = "";
+
+      players.forEach((player, index) => {
+        const div = document.createElement("div");
+        div.className = "player";
+
+        div.innerHTML = `
+          <strong>${player.name}</strong>
+          <div>
+            <button onclick="changeScore(${index}, -1)">−</button>
+            <span class="score">${player.score}</span>
+            <button onclick="changeScore(${index}, 1)">+</button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    function addPlayer() {
+      const input = document.getElementById("playerName");
+      if (!input.value) return;
+
+      players.push({ name: input.value, score: 0 });
+      input.value = "";
+      save();
+      render();
+    }
+
+    function changeScore(index, amount) {
+      players[index].score += amount;
+      save();
+      render();
+    }
+
+    function resetScores() {
+      players.forEach(p => p.score = 0);
+      save();
+      render();
+    }
+
+    render();
+  </script>
+
+</body>
+</html>
